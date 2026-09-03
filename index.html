@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hòm Thư Tố Giác Tội Phạm - Công An Xã Đức Hợp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-[#8B0000] text-white border-b-4 border-[#FFD700] shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('citizen')">
+        <div class="w-10 h-10 rounded-full bg-red-800 border-2 border-amber-400 flex items-center justify-center font-black text-amber-300 text-lg shadow">★</div>
+        <div>
+          <h1 class="text-base md:text-lg font-black uppercase leading-tight">CÔNG AN XÃ ĐỨC HỢP</h1>
+          <p class="text-xs text-[#FFD700] font-semibold uppercase">CÔNG AN TỈNH HƯNG YÊN • HÒM THƯ TỐ GIÁC SỐ</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <button onclick="switchView('citizen')" class="px-3 py-1.5 rounded-lg font-bold bg-white/20 text-white cursor-pointer">📝 Gửi Tố Giác</button>
+        <button onclick="switchView('track')" class="px-3 py-1.5 rounded-lg font-bold bg-black/20 text-white cursor-pointer">🔍 Tra Cứu</button>
+        <button onclick="openLegalModal()" class="px-3 py-1.5 rounded-lg font-bold bg-amber-400 text-red-950 cursor-pointer">⚖️ Pháp Lý</button>
+        <button onclick="handleOfficerNavClick()" class="px-3 py-1.5 rounded-lg font-bold bg-[#FFD700] text-[#8B0000] cursor-pointer">🔒 Cán Bộ Trực Ban</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+    <!-- View: Gửi tin tố giác (Công dân) -->
+    <section id="view-citizen" class="max-w-3xl mx-auto bg-white rounded-2xl border p-6 space-y-4 text-xs shadow-sm">
+      <div class="border-b pb-3 flex justify-between items-center">
+        <h2 class="text-base font-black uppercase text-red-950">GỬI THÔNG TIN TỐ GIÁC TỘI PHẠM & ANTT</h2>
+        <span class="px-3 py-1 bg-emerald-700 text-white rounded-full font-bold">Bảo mật 100%</span>
+      </div>
+      <form id="citizen-form" onsubmit="submitCitizenForm(event)" class="space-y-4">
+        <div>
+          <label class="block font-bold mb-1">1. Thuộc Thôn (Xã Đức Hợp) <span class="text-red-600">*</span></label>
+          <select id="c-village" required class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold">
+            <option value="">-- Chọn 1 trong 11 thôn --</option>
+            <option value="Đức An">Thôn Đức An</option>
+            <option value="Đức Trung">Thôn Đức Trung</option>
+            <option value="Phú Ninh">Thôn Phú Ninh</option>
+            <option value="Nho Lâm">Thôn Nho Lâm</option>
+            <option value="Hạnh Lâm">Thôn Hạnh Lâm</option>
+            <option value="Vân Nghệ">Thôn Vân Nghệ</option>
+            <option value="Trung Hòa">Thôn Trung Hòa</option>
+            <option value="Phú Cường">Thôn Phú Cường</option>
+            <option value="Quảng Lạc">Thôn Quảng Lạc</option>
+            <option value="Bắc Nam Phú">Thôn Bắc Nam Phú</option>
+            <option value="Tây Thịnh">Thôn Tây Thịnh</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">2. Địa điểm cụ thể</label>
+          <input type="text" id="c-location" placeholder="Số nhà, đoạn đường, ngã tư..." class="w-full p-2.5 bg-slate-50 border rounded-xl" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold mb-1">3. Phân loại tin báo</label>
+            <select id="c-category" class="w-full p-2.5 bg-slate-50 border rounded-xl">
+              <option value="Trộm cắp, cướp giật tài sản">Trộm cắp, cướp giật tài sản</option>
+              <option value="Cờ bạc, số đề, cá độ">Cờ bạc, số đề, cá độ</option>
+              <option value="Ma túy, chất gây nghiện">Ma túy, chất gây nghiện</option>
+              <option value="Gây rối trật tự, đánh nhau">Gây rối trật tự, đánh nhau</option>
+              <option value="Gian lận thương mại, ATTP">Gian lận thương mại, ATTP</option>
+              <option value="Phản ánh khác về ANTT">Phản ánh khác về ANTT</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">4. Mức độ khẩn cấp</label>
+            <select id="c-priority" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-red-900">
+              <option value="MEDIUM">Bình thường (Đang chuẩn bị / Đã xảy ra)</option>
+              <option value="URGENT">Khẩn cấp (Đang diễn ra cần xử lý ngay)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">5. Nội dung phản ánh chi tiết <span class="text-red-600">*</span></label>
+          <textarea id="c-description" required rows="4" placeholder="Mô tả diễn biến, thời gian, số lượng đối tượng..." class="w-full p-2.5 bg-slate-50 border rounded-xl"></textarea>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">6. Nhận dạng đối tượng / Biển số xe</label>
+          <input type="text" id="c-suspect" class="w-full p-2.5 bg-slate-50 border rounded-xl" />
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border">
+          <label class="block font-bold mb-1">📎 Đính kèm hình ảnh/tài liệu (Tự động tải lên Google Drive):</label>
+          <input type="file" id="c-files" multiple onchange="handleFileSelection(event)" class="w-full p-1.5 bg-white border rounded-lg cursor-pointer" />
+          <div id="file-preview-list" class="mt-2 space-y-1 text-[11px]"></div>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-bold">Thông tin người báo tin:</span>
+            <label class="flex items-center gap-1 font-bold text-emerald-800 cursor-pointer">
+              <input type="checkbox" id="c-anonymous" onchange="document.getElementById('rep-fields').style.opacity = this.checked ? '0.3' : '1'" />
+              <span>Gửi ẩn danh hoàn toàn</span>
+            </label>
+          </div>
+          <div id="rep-fields" class="grid grid-cols-2 gap-3">
+            <input type="text" id="c-name" placeholder="Họ và tên" class="p-2 bg-white border rounded-lg" />
+            <input type="tel" id="c-phone" placeholder="Số điện thoại" class="p-2 bg-white border rounded-lg" />
+          </div>
+        </div>
+        <label class="flex items-start gap-2 pt-1 cursor-pointer">
+          <input type="checkbox" id="chk-confirm" required class="mt-1" />
+          <span class="text-slate-700 font-medium">Tôi cam đoan thông tin khai báo là đúng sự thật và chịu trách nhiệm trước pháp luật.</span>
+        </label>
+        <button type="submit" id="btn-submit" class="w-full py-3 bg-red-900 hover:bg-red-800 text-white font-bold rounded-xl uppercase shadow cursor-pointer">
+          🚀 Gửi Tin Báo Tới Công An Xã Đức Hợp
+        </button>
+      </form>
+    </section>
+
+    <!-- View: Tra cứu -->
+    <section id="view-track" class="max-w-2xl mx-auto bg-white rounded-2xl border p-6 space-y-4 text-xs hidden shadow-sm">
+      <h2 class="text-base font-black uppercase text-red-950">TRA CỨU TIẾN ĐỘ HỒ SƠ</h2>
+      <div class="flex gap-2">
+        <input type="text" id="track-id" placeholder="Nhập mã hồ sơ (Ví dụ: DH-2026-12345)" class="flex-1 p-2.5 bg-slate-50 border rounded-xl font-mono uppercase font-bold" />
+        <button onclick="handleTrack()" class="px-5 py-2.5 bg-red-900 text-white font-bold rounded-xl cursor-pointer">Tra Cứu</button>
+      </div>
+      <div id="track-box" class="hidden p-4 rounded-xl bg-slate-50 border space-y-2"></div>
+    </section>
+
+    <!-- View: Đăng nhập cán bộ -->
+    <section id="view-login" class="max-w-sm mx-auto bg-white rounded-2xl border p-6 space-y-4 text-xs hidden shadow-md">
+      <div class="text-center border-b pb-3">
+        <h3 class="text-sm font-black uppercase text-red-950">ĐĂNG NHẬP CÁN BỘ CÔNG AN XÃ</h3>
+        <p class="text-slate-500 mt-0.5">Hệ thống thụ lý và quản lý hồ sơ ANTT</p>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-3">
+        <div>
+          <label class="block font-bold mb-1">Tài khoản / Số hiệu</label>
+          <input type="text" id="l-user" required placeholder="Nhập tài khoản hoặc số hiệu..." class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold font-mono" />
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Mật khẩu</label>
+          <input type="password" id="l-pass" required placeholder="Nhập mật khẩu..." class="w-full p-2.5 bg-slate-50 border rounded-xl" />
+        </div>
+        <button type="submit" id="btn-login" class="w-full py-2.5 bg-red-900 hover:bg-red-800 text-white font-bold rounded-xl uppercase cursor-pointer">Đăng Nhập</button>
+      </form>
+    </section>
+
+    <!-- View: Dashboard Cán bộ -->
+    <section id="view-dashboard" class="space-y-4 text-xs hidden">
+      <div class="bg-white p-4 rounded-2xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+        <div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase">CÁN BỘ ĐANG ĐĂNG NHẬP:</span>
+          <h3 id="dash-name" class="text-sm font-black text-red-950"></h3>
+          <span id="dash-role" class="text-slate-600"></span>
+        </div>
+        <div class="flex gap-1.5 flex-wrap">
+          <button onclick="switchTab('cases')" id="t-cases" class="px-3 py-1.5 rounded-lg font-bold bg-red-900 text-white cursor-pointer">📂 Hồ Sơ</button>
+          <button onclick="switchTab('stats')" id="t-stats" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 cursor-pointer">📊 Biểu Đồ Thống Kê</button>
+          <button onclick="switchTab('officers')" id="t-officers" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 cursor-pointer">👮 Quản Lý Cán Bộ</button>
+          <button onclick="switchTab('audit')" id="t-audit" class="px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 cursor-pointer">🛡️ Audit Log</button>
+          <button onclick="openChangePassModal()" class="px-3 py-1.5 rounded-lg font-bold bg-amber-100 text-amber-900 cursor-pointer">🔑 Đổi MK</button>
+          <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg font-bold bg-slate-200 text-slate-800 cursor-pointer">Đăng Xuất</button>
+        </div>
+      </div>
+
+      <!-- Tab Hồ Sơ -->
+      <div id="tab-cases" class="space-y-3">
+        <div class="bg-white p-3 rounded-xl border grid grid-cols-1 sm:grid-cols-4 gap-2">
+          <input type="text" id="f-kw" placeholder="Tìm theo mã, nội dung..." class="p-2 bg-slate-50 border rounded-lg" onkeyup="filterCases()" />
+          <select id="f-village" class="p-2 bg-slate-50 border rounded-lg font-bold" onchange="filterCases()">
+            <option value="ALL">Tất cả thôn</option>
+            <option value="Đức An">Thôn Đức An</option>
+            <option value="Đức Trung">Thôn Đức Trung</option>
+            <option value="Phú Ninh">Thôn Phú Ninh</option>
+            <option value="Nho Lâm">Thôn Nho Lâm</option>
+            <option value="Hạnh Lâm">Thôn Hạnh Lâm</option>
+            <option value="Vân Nghệ">Thôn Vân Nghệ</option>
+            <option value="Trung Hòa">Thôn Trung Hòa</option>
+            <option value="Phú Cường">Thôn Phú Cường</option>
+            <option value="Quảng Lạc">Thôn Quảng Lạc</option>
+            <option value="Bắc Nam Phú">Thôn Bắc Nam Phú</option>
+            <option value="Tây Thịnh">Thôn Tây Thịnh</option>
+          </select>
+          <select id="f-status" class="p-2 bg-slate-50 border rounded-lg font-bold" onchange="filterCases()">
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="NEW">Mới</option>
+            <option value="ASSIGNED">Đã phân công</option>
+            <option value="PROCESSING">Đang xử lý</option>
+            <option value="RESOLVED">Đã giải quyết</option>
+            <option value="CLOSED">Đã đóng</option>
+          </select>
+          <button onclick="loadDashboardCases()" class="p-2 bg-red-900 text-white font-bold rounded-lg cursor-pointer">🔄 Tải lại</button>
+        </div>
+        <div class="bg-white rounded-xl border overflow-x-auto p-2">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-red-950 text-white font-bold uppercase text-[11px]">
+              <tr>
+                <th class="p-2.5">Mã hồ sơ</th>
+                <th class="p-2.5">Thôn</th>
+                <th class="p-2.5">Loại tin</th>
+                <th class="p-2.5">Phó CAX Chủ Trì</th>
+                <th class="p-2.5">Cán Bộ Thực Hiện</th>
+                <th class="p-2.5">Trạng thái</th>
+                <th class="p-2.5 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="case-tbody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Biểu Đồ Thống Kê -->
+      <div id="tab-stats" class="space-y-4 hidden">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <div class="bg-white p-3 rounded-xl border text-center"><span class="text-slate-500 font-bold block">TỔNG TIN</span><strong id="st-total" class="text-xl">0</strong></div>
+          <div class="bg-white p-3 rounded-xl border text-center"><span class="text-red-700 font-bold block">HÔM NAY</span><strong id="st-today" class="text-xl text-red-700">0</strong></div>
+          <div class="bg-white p-3 rounded-xl border text-center"><span class="text-amber-700 font-bold block">CHỜ XÁC MINH</span><strong id="st-new" class="text-xl text-amber-700">0</strong></div>
+          <div class="bg-white p-3 rounded-xl border text-center"><span class="text-blue-700 font-bold block">ĐANG XỬ LÝ</span><strong id="st-proc" class="text-xl text-blue-700">0</strong></div>
+          <div class="bg-white p-3 rounded-xl border text-center"><span class="text-emerald-700 font-bold block">ĐÃ XỬ LÝ</span><strong id="st-res" class="text-xl text-emerald-700">0</strong></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 bg-white p-4 rounded-xl border space-y-2">
+            <h4 class="font-bold text-slate-800 uppercase">📍 PHÂN BỔ 11 THÔN</h4>
+            <div class="h-60"><canvas id="villageChart"></canvas></div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border space-y-2">
+            <h4 class="font-bold text-slate-800 uppercase">🥧 PHÂN LOẠI TIN BÁO</h4>
+            <div class="h-60 flex items-center justify-center"><canvas id="catChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Quản Lý Cán Bộ -->
+      <div id="tab-officers" class="space-y-3 hidden">
+        <div class="bg-white p-3 rounded-xl border flex justify-between items-center">
+          <h4 class="font-bold uppercase text-red-950">DANH SÁCH CÁN BỘ & ĐỊA BÀN PHỤ TRÁCH</h4>
+          <button id="btn-add-officer" onclick="openOfficerModal()" class="px-3 py-1.5 bg-red-900 text-white font-bold rounded-lg cursor-pointer">➕ Thêm Cán Bộ</button>
+        </div>
+        <div class="bg-white rounded-xl border overflow-x-auto p-2">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800 text-white uppercase text-[11px]">
+              <tr><th class="p-2">Số hiệu</th><th class="p-2">Họ tên</th><th class="p-2">Cấp bậc/Chức vụ</th><th class="p-2">Vai trò</th><th class="p-2">SĐT</th><th class="p-2">Thôn phụ trách</th><th class="p-2 text-center">Thao tác</th></tr>
+            </thead>
+            <tbody id="officers-tbody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Audit Log -->
+      <div id="tab-audit" class="space-y-3 hidden">
+        <div class="bg-white rounded-xl border p-3 overflow-x-auto max-h-96">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-800 text-white uppercase sticky top-0"><tr><th class="p-2">Thời gian</th><th class="p-2">Cán bộ</th><th class="p-2">Hành động</th><th class="p-2">Chi tiết</th></tr></thead>
+            <tbody id="audit-tbody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Chi Tiết & Phân Công -->
+  <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 text-xs max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="md-case-id" class="text-sm font-black text-red-950 font-mono">--</h3>
+        <button onclick="closeDetailModal()" class="text-slate-400 font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="p-3 bg-slate-50 rounded-xl border grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div><span class="text-slate-500 block">Địa bàn:</span> <strong id="md-village">--</strong></div>
+        <div><span class="text-slate-500 block">Mức độ:</span> <span id="md-priority">--</span></div>
+        <div><span class="text-slate-500 block">Trạng thái:</span> <strong id="md-status" class="text-blue-900">--</strong></div>
+        <div><span class="text-slate-500 block">Người báo:</span> <span id="md-reporter">--</span></div>
+      </div>
+      <div>
+        <h4 class="font-bold uppercase text-slate-900 mb-1">Nội dung tố giác:</h4>
+        <div id="md-desc" class="p-3 bg-slate-50 rounded-xl border leading-relaxed whitespace-pre-wrap"></div>
+      </div>
+      <div>
+        <h4 class="font-bold uppercase text-slate-900 mb-1">Tài liệu đính kèm (Drive):</h4>
+        <div id="md-att" class="space-y-1">Chưa có tệp đính kèm</div>
+      </div>
+
+      <!-- Khung phân công nghiệp vụ (Được kiểm soát quyền hiển thị) -->
+      <div class="p-4 bg-slate-100 rounded-xl border space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          
+          <!-- Box Phân công (Chỉ Leadership/Admin thấy & thao tác) -->
+          <div id="box-assignment" class="bg-white p-3 rounded-xl border space-y-2">
+            <h4 class="font-black text-red-950 uppercase border-b pb-1">👮 PHÂN CÔNG CHỦ TRÌ & CÁN BỘ</h4>
+            <div>
+              <label class="block font-bold mb-1">1. Phó Trưởng CAX chủ trì:</label>
+              <select id="md-deputy" class="w-full p-2 bg-slate-50 border rounded-lg font-bold text-red-950"></select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">2. Cán bộ thực hiện:</label>
+              <div id="md-officers-box" class="max-h-28 overflow-y-auto space-y-1 bg-slate-50 p-2 rounded-lg border"></div>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">3. Ý kiến chỉ đạo:</label>
+              <input type="text" id="md-directive" class="w-full p-2 border rounded-lg" placeholder="Chỉ đạo của Chỉ huy..." />
+            </div>
+            <button onclick="saveAssignment()" class="w-full py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-lg cursor-pointer">💾 Lưu Phân Công</button>
+          </div>
+
+          <!-- Box Readonly cho Cán bộ thường khi không có quyền phân công -->
+          <div id="box-assignment-readonly" class="hidden bg-white p-3 rounded-xl border space-y-2">
+            <h4 class="font-black text-red-950 uppercase border-b pb-1">📋 THÔNG TIN CHỈ ĐẠO CỦA CHỈ HUY</h4>
+            <div class="p-2 bg-slate-50 rounded-lg border space-y-1">
+              <div><span class="text-slate-500">Phó CAX chủ trì:</span> <strong id="ro-deputy" class="text-blue-900">--</strong></div>
+              <div><span class="text-slate-500">Cán bộ thực hiện:</span> <span id="ro-officers" class="font-bold text-slate-800">--</span></div>
+              <div><span class="text-slate-500">Ý kiến chỉ đạo:</span> <span id="ro-directive" class="italic text-slate-800">--</span></div>
+            </div>
+            <p class="text-[10px] text-slate-500 italic">* Quyền phân công thuộc Ban Chỉ huy & Quản trị viên.</p>
+          </div>
+
+          <!-- Box Báo cáo kết quả giải quyết -->
+          <div class="bg-white p-3 rounded-xl border space-y-2">
+            <h4 class="font-black text-red-950 uppercase border-b pb-1">📝 BÁO CÁO TIẾN ĐỘ & KẾT QUẢ</h4>
+            <div>
+              <label class="block font-bold mb-1">Trạng thái xử lý:</label>
+              <select id="md-next-status" class="w-full p-2 bg-slate-50 border rounded-lg font-bold">
+                <option value="PROCESSING">Đang xác minh/xử lý (PROCESSING)</option>
+                <option value="RESOLVED">Giải quyết xong (RESOLVED)</option>
+                <option value="CLOSED">Đóng hồ sơ (CLOSED)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Báo cáo kết quả giải quyết:</label>
+              <textarea id="md-res-note" rows="3" class="w-full p-2 border rounded-lg" placeholder="Nội dung kết quả xác minh..."></textarea>
+            </div>
+            <button onclick="saveStatus()" class="w-full py-2 bg-red-900 hover:bg-red-800 text-white font-bold rounded-lg cursor-pointer">🔄 Cập Nhật Trạng Thái</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-bold uppercase text-slate-900 mb-1">Nhật ký tiến trình:</h4>
+        <div id="md-hist" class="space-y-1 max-h-28 overflow-y-auto"></div>
+      </div>
+      <div class="flex justify-between pt-2 border-t">
+        <button id="btn-delete-case" onclick="deleteCurrentCase()" class="px-3 py-1.5 bg-red-100 text-red-900 font-bold rounded-lg cursor-pointer">🗑️ Xóa</button>
+        <button onclick="closeDetailModal()" class="px-5 py-1.5 bg-slate-200 text-slate-800 font-bold rounded-lg cursor-pointer">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thêm/Sửa Cán Bộ & Chọn Địa Bàn Phụ Trách -->
+  <div id="officer-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 text-xs max-h-[90vh] overflow-y-auto">
+      <h3 class="text-sm font-black uppercase text-red-950 border-b pb-2">THÔNG TIN CÁN BỘ & ĐỊA BÀN PHỤ TRÁCH</h3>
+      <form onsubmit="handleSaveOfficer(event)" class="space-y-3">
+        <input type="hidden" id="of-id" />
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block font-bold mb-0.5">Họ và tên</label><input type="text" id="of-name" required class="w-full p-2 bg-slate-50 border rounded-lg" /></div>
+          <div><label class="block font-bold mb-0.5">Số hiệu CAND</label><input type="text" id="of-badge" required class="w-full p-2 bg-slate-50 border rounded-lg font-mono" /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-0.5">Cấp bậc</label>
+            <select id="of-rank" class="w-full p-2 bg-slate-50 border rounded-lg">
+              <option value="Thượng tá">Thượng tá</option><option value="Trung tá">Trung tá</option><option value="Thiếu tá">Thiếu tá</option>
+              <option value="Đại úy">Đại úy</option><option value="Thượng úy">Thượng úy</option><option value="Trung úy">Trung úy</option>
+            </select>
+          </div>
+          <div><label class="block font-bold mb-0.5">Chức vụ</label><input type="text" id="of-pos" required class="w-full p-2 bg-slate-50 border rounded-lg" /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-0.5">Vai trò hệ thống</label>
+            <select id="of-role" class="w-full p-2 bg-slate-50 border rounded-lg font-bold text-red-950">
+              <option value="PROCESSING_OFFICER">Cán bộ thụ lý</option>
+              <option value="DEPUTY_CHIEF">Phó Trưởng CAX (Chủ trì)</option>
+              <option value="CHIEF">Trưởng CAX (Chỉ huy)</option>
+              <option value="SUPER_ADMIN">Quản Trị Viên (Toàn quyền)</option>
+            </select>
+          </div>
+          <div><label class="block font-bold mb-0.5">Số điện thoại</label><input type="tel" id="of-phone" class="w-full p-2 bg-slate-50 border rounded-lg" /></div>
+        </div>
+
+        <!-- Khung chọn địa bàn phụ trách -->
+        <div class="p-3 bg-slate-50 rounded-xl border space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-bold text-slate-800">📍 Địa bàn 11 thôn phụ trách:</label>
+            <button type="button" onclick="toggleAllVillages()" class="text-blue-700 font-bold hover:underline">Chọn tất cả 11 thôn</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-2 bg-white rounded-lg border max-h-36 overflow-y-auto" id="village-checkboxes">
+            <!-- 11 thôn -->
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeOfficerModal()" class="px-4 py-1.5 bg-slate-200 rounded-lg font-bold cursor-pointer">Hủy</button>
+          <button type="submit" class="px-4 py-1.5 bg-red-900 hover:bg-red-800 text-white rounded-lg font-bold cursor-pointer">Lưu Cán Bộ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Đổi Mật Khẩu -->
+  <div id="cp-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-3 text-xs">
+      <h3 class="font-black uppercase text-red-950 border-b pb-2">🔑 ĐỔI MẬT KHẨU TÀI KHOẢN</h3>
+      <form onsubmit="handleChangePass(event)" class="space-y-2">
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Mật khẩu hiện tại</label>
+          <input type="password" id="cp-old" placeholder="Nhập mật khẩu hiện tại" required class="w-full p-2 border rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-slate-700 font-bold mb-1">Mật khẩu mới</label>
+          <input type="password" id="cp-new" placeholder="Nhập mật khẩu mới" required class="w-full p-2 border rounded-lg" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="document.getElementById('cp-modal').classList.add('hidden')" class="px-3 py-1.5 bg-slate-200 rounded-lg cursor-pointer">Hủy</button>
+          <button type="submit" class="px-4 py-1.5 bg-red-900 hover:bg-red-800 text-white font-bold rounded-lg cursor-pointer">Lưu Mật Khẩu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Pháp Lý -->
+  <div id="legal-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-3 text-xs">
+      <h3 class="font-black uppercase text-red-950 border-b pb-2">⚖️ CẢNH BÁO PHÁP LÝ</h3>
+      <p class="leading-relaxed">Căn cứ Điều 156 BLHS 2015 & điểm c, khoản 3, Điều 8, Nghị định 282/2025/NĐ-CP: Nghiêm cấm hành vi báo tin giả, vu khống. Mọi thông tin tố giác đúng sự thật được Công an xã Đức Hợp bảo vệ bí mật danh tính tuyệt đối.</p>
+      <div class="flex justify-end"><button onclick="document.getElementById('legal-modal').classList.add('hidden')" class="px-4 py-1.5 bg-red-900 text-white font-bold rounded-lg cursor-pointer">Đã hiểu</button></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-[#1e2330] text-gray-300 border-t-2 border-gray-700 pt-8 pb-6 text-xs mt-auto">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div>
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="px-2 py-0.5 bg-red-800 border border-amber-400 font-bold text-amber-300 rounded">CA</span>
+          <h4 class="font-extrabold text-white text-xs uppercase">CÔNG AN XÃ ĐỨC HỢP</h4>
+        </div>
+        <p class="text-gray-400 text-[11px] leading-relaxed mb-2">Hệ thống tiếp nhận & xử lý tin báo ANTT trực tuyến 24/7 trên địa bàn 11 thôn.</p>
+        <p class="text-emerald-400 text-[11px] font-semibold">🛡️ Bảo mật danh tính người báo tin tuyệt đối</p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-[#FFD700] text-xs uppercase mb-2">BAN CHỈ HUY CAX</h4>
+        <ul class="space-y-1 text-[11px] text-gray-300">
+          <li><strong class="text-white">Thượng tá Đoàn Ngọc Quang</strong> - Trưởng CAX (0983.892.222)</li>
+          <li><strong class="text-white">Thiếu tá Phạm Văn Hài</strong> - Phó CAX PCTP (0986.106.548)</li>
+          <li><strong class="text-white">Thiếu tá Phạm Văn Ngoạn</strong> - Phó CAX AN (0987.827.336)</li>
+          <li><strong class="text-white">Trung tá Đặng Hồng Ngọc</strong> - Phó CAX Tổng hợp (0944.061.666)</li>
+          <li><strong class="text-white">Trung tá Vũ Văn Thu</strong> - Phó CAX CSTT (0988.178.118)</li>
+          <li><strong class="text-white">Trung tá Nguyễn Văn Doanh</strong> - Phó CAX CSKV (0987.668.867)</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-[#FFD700] text-xs uppercase mb-2">ĐỊA BÀN 11 THÔN</h4>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-gray-300">
+          <span>• Thôn Đức An</span><span>• Thôn Đức Trung</span><span>• Thôn Phú Ninh</span><span>• Thôn Nho Lâm</span>
+          <span>• Thôn Hạnh Lâm</span><span>• Thôn Vân Nghệ</span><span>• Thôn Trung Hòa</span><span>• Thôn Phú Cường</span>
+          <span>• Thôn Quảng Lạc</span><span>• Thôn Bắc Nam Phú</span><span>• Thôn Tây Thịnh</span>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-[#FFD700] text-xs uppercase mb-2">TRỤ SỞ & LIÊN HỆ</h4>
+        <ul class="space-y-1.5 text-[11px]">
+          <li>📍 Thôn Nho Lâm, xã Đức Hợp, tỉnh Hưng Yên</li>
+          <li>📞 <strong class="text-[#FFD700]">Trực ban: 02213.815.999 (24/7)</strong></li>
+          <li>✉ <span class="text-cyan-300">conganxaduchopdangbai@gmail.com</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 pt-3 text-center text-gray-400 text-[11px]">© 2026 CÔNG AN XÃ ĐỨC HỢP - CÔNG AN TỈNH HƯNG YÊN.</div>
+  </footer>
+
+  <!-- Script Logic -->
+  <script>
+    var currentOfficer = null;
+    var cachedCases = [];
+    var cachedOfficers = [];
+    var attachedFiles = [];
+    var activeDetailCaseId = null;
+    var vChart = null, cChart = null;
+
+    var ALL_VILLAGES = [
+      "Đức An", "Đức Trung", "Phú Ninh", "Nho Lâm", "Hạnh Lâm", 
+      "Vân Nghệ", "Trung Hòa", "Phú Cường", "Quảng Lạc", "Bắc Nam Phú", "Tây Thịnh"
+    ];
+
+    function openLegalModal() { document.getElementById('legal-modal').classList.remove('hidden'); }
+    function openChangePassModal() { document.getElementById('cp-modal').classList.remove('hidden'); }
+
+    function isLeadership(officer) {
+      if (!officer) return false;
+      var r = String(officer.role || '').toUpperCase();
+      return r === 'SUPER_ADMIN' || r === 'ADMIN' || r === 'CHIEF' || r === 'DEPUTY_CHIEF';
+    }
+
+    function switchView(viewName) {
+      ['citizen', 'track', 'login', 'dashboard'].forEach(function(v) { document.getElementById('view-' + v).classList.add('hidden'); });
+      document.getElementById('view-' + viewName).classList.remove('hidden');
+      if (viewName === 'dashboard') loadDashboardCases();
+    }
+
+    function handleOfficerNavClick() {
+      if (currentOfficer) switchView('dashboard');
+      else switchView('login');
+    }
+
+    function switchTab(tabName) {
+      ['cases', 'stats', 'officers', 'audit'].forEach(function(t) {
+        document.getElementById('tab-' + t).classList.add('hidden');
+        document.getElementById('t-' + t).className = 'px-3 py-1.5 rounded-lg font-bold bg-slate-100 text-slate-700 cursor-pointer';
+      });
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+      document.getElementById('t-' + tabName).className = 'px-3 py-1.5 rounded-lg font-bold bg-red-900 text-white shadow cursor-pointer';
+      if (tabName === 'stats') loadStats();
+      if (tabName === 'officers') renderOfficers();
+      if (tabName === 'audit') loadAudit();
+    }
+
+    function handleFileSelection(e) {
+      var files = e.target.files;
+      var preview = document.getElementById('file-preview-list');
+      attachedFiles = [];
+      preview.innerHTML = '';
+      for (var i = 0; i < files.length; i++) {
+        (function(file) {
+          var reader = new FileReader();
+          reader.onload = function(evt) {
+            attachedFiles.push({ fileName: file.name, mimeType: file.type, size: file.size, base64Content: evt.target.result.split(',')[1] });
+            preview.innerHTML += '<div class="p-1 bg-white border rounded">📄 ' + file.name + ' <span class="text-emerald-700 font-bold">✓ Sẵn sàng</span></div>';
+          };
+          reader.readAsDataURL(file);
+        })(files[i]);
+      }
+    }
+
+    function submitCitizenForm(e) {
+      e.preventDefault();
+      var btn = document.getElementById('btn-submit');
+      btn.disabled = true; btn.innerText = 'Đang chuyển tin...';
+      var payload = {
+        village: document.getElementById('c-village').value, incidentLocation: document.getElementById('c-location').value,
+        category: document.getElementById('c-category').value, priority: document.getElementById('c-priority').value,
+        description: document.getElementById('c-description').value, suspectDescription: document.getElementById('c-suspect').value,
+        isAnonymous: document.getElementById('c-anonymous').checked, reporterName: document.getElementById('c-name').value,
+        reporterPhone: document.getElementById('c-phone').value, files: attachedFiles
+      };
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          btn.disabled = false; btn.innerText = '🚀 Gửi Tin Báo Tới Công An Xã Đức Hợp';
+          if (res.success) {
+            alert('✅ TIẾP NHẬN THÀNH CÔNG!\n\nMã hồ sơ: ' + res.caseId);
+            document.getElementById('citizen-form').reset();
+            document.getElementById('file-preview-list').innerHTML = '';
+            attachedFiles = [];
+          } else alert(res.message);
+        }).submitCitizenCase(payload);
+      }
+    }
+
+    function handleTrack() {
+      var id = document.getElementById('track-id').value;
+      if (!id) return;
+      var box = document.getElementById('track-box');
+      box.classList.remove('hidden'); box.innerHTML = 'Đang tra cứu...';
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res.success) {
+            var d = res.data;
+            box.innerHTML = '<strong>Mã: ' + d.caseId + '</strong> - Thôn ' + d.village + '<br>Trạng thái: <span class="text-blue-800 font-bold">' + d.status + '</span><br>Tiến độ: ' + (d.resolutionNote || 'Đang xác minh.');
+          } else box.innerHTML = '<span class="text-red-700 font-bold">' + res.message + '</span>';
+        }).trackCitizenCase(id);
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      var u = document.getElementById('l-user').value, p = document.getElementById('l-pass').value;
+      var btn = document.getElementById('btn-login');
+      btn.innerText = 'Đang xác thực...';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = 'Đăng Nhập';
+          if (res.success) {
+            currentOfficer = res.data;
+            document.getElementById('dash-name').innerText = currentOfficer.rank + ' ' + currentOfficer.fullName;
+            document.getElementById('dash-role').innerText = currentOfficer.position + ' • Vai trò: ' + currentOfficer.role;
+            
+            // Ẩn nút Thêm Cán Bộ nếu không phải Quản trị/Chỉ huy
+            var canManageOfficers = isLeadership(currentOfficer);
+            var addBtn = document.getElementById('btn-add-officer');
+            if (addBtn) addBtn.style.display = canManageOfficers ? 'block' : 'none';
+
+            switchView('dashboard');
+          } else alert(res.message);
+        }).withFailureHandler(function(err) {
+          btn.innerText = 'Đăng Nhập';
+          alert('Lỗi đăng nhập: ' + err.message);
+        }).authenticateOfficer(u, p);
+      }
+    }
+
+    function handleLogout() { currentOfficer = null; switchView('login'); }
+
+    function loadDashboardCases() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res.success) { cachedCases = res.data; renderCases(cachedCases); }
+        }).getOfficerCases(null, currentOfficer);
+        google.script.run.withSuccessHandler(function(res) { if (res.success) cachedOfficers = res.data; }).getAllOfficers(currentOfficer);
+      }
+    }
+
+    function renderCases(cases) {
+      var tbody = document.getElementById('case-tbody');
+      if (!cases || cases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">Không có hồ sơ nào.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = cases.map(function(c) {
+        var dep = c.assignedDeputyName ? ('<span class="font-bold text-blue-900">' + c.assignedDeputyName + '</span>') : '<span class="text-slate-400">Chưa phân công</span>';
+        var off = c.assignedOfficerNames ? ('<span class="text-slate-800">' + c.assignedOfficerNames + '</span>') : '<span class="text-slate-400">Chưa chỉ định</span>';
+        return '<tr class="hover:bg-slate-50">' +
+          '<td class="p-2.5 font-mono font-bold text-red-950">' + c.caseId + '</td>' +
+          '<td class="p-2.5">Thôn ' + c.village + '</td><td class="p-2.5">' + c.category + '</td>' +
+          '<td class="p-2.5">' + dep + '</td><td class="p-2.5">' + off + '</td>' +
+          '<td class="p-2.5 font-bold text-blue-900">' + c.status + '</td>' +
+          '<td class="p-2.5 text-center"><button onclick="viewCase(\'' + c.caseId + '\')" class="px-2.5 py-1 bg-red-900 text-white rounded font-bold cursor-pointer">Chi tiết</button></td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function filterCases() {
+      var kw = document.getElementById('f-kw').value.toLowerCase();
+      var v = document.getElementById('f-village').value;
+      var s = document.getElementById('f-status').value;
+      var filtered = cachedCases.filter(function(c) {
+        if (v !== 'ALL' && c.village !== v) return false;
+        if (s !== 'ALL' && c.status !== s) return false;
+        if (kw && (c.caseId + ' ' + c.description + ' ' + c.reporterName).toLowerCase().indexOf(kw) === -1) return false;
+        return true;
+      });
+      renderCases(filtered);
+    }
+
+    function viewCase(caseId) {
+      activeDetailCaseId = caseId;
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.getElementById('md-case-id').innerText = caseId;
+
+      var hasAssignPerm = isLeadership(currentOfficer);
+      document.getElementById('box-assignment').classList.toggle('hidden', !hasAssignPerm);
+      document.getElementById('box-assignment-readonly').classList.toggle('hidden', hasAssignPerm);
+
+      var delBtn = document.getElementById('btn-delete-case');
+      if (delBtn) delBtn.style.display = (currentOfficer && (currentOfficer.role === 'SUPER_ADMIN' || currentOfficer.role === 'CHIEF')) ? 'block' : 'none';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res.success) {
+            var c = res.data.caseRecord;
+            document.getElementById('md-village').innerText = 'Thôn ' + c.village;
+            document.getElementById('md-priority').innerText = c.priority;
+            document.getElementById('md-status').innerText = c.status;
+            document.getElementById('md-reporter').innerText = c.isAnonymous === 'YES' ? '🔒 ẨN DANH' : (c.reporterName + ' - ' + c.reporterPhone);
+            document.getElementById('md-desc').innerText = c.description;
+            
+            var attEl = document.getElementById('md-att');
+            if (res.data.attachments && res.data.attachments.length > 0) {
+              attEl.innerHTML = res.data.attachments.map(function(a) {
+                return '<div class="p-1.5 bg-slate-50 border rounded flex justify-between"><span>📎 ' + a.fileName + '</span><a href="' + a.driveUrl + '" target="_blank" class="text-blue-700 font-bold">Mở Drive</a></div>';
+              }).join('');
+            } else attEl.innerHTML = '<span class="text-slate-400 italic">Không có file đính kèm</span>';
+
+            // Cập nhật thông tin Readonly
+            document.getElementById('ro-deputy').innerText = c.assignedDeputyName || 'Chưa chỉ định';
+            document.getElementById('ro-officers').innerText = c.assignedOfficerNames || 'Chưa chỉ định';
+            document.getElementById('ro-directive').innerText = c.directiveNote || 'Chưa có ý kiến chỉ đạo';
+
+            // Nạp danh sách Phó CAX
+            var depSel = document.getElementById('md-deputy');
+            var deputies = cachedOfficers.filter(function(o) { return o.role === 'DEPUTY_CHIEF' || (o.position && o.position.indexOf('Phó') !== -1); });
+            depSel.innerHTML = '<option value="">-- Chọn Phó Trưởng CAX chủ trì --</option>' +
+              deputies.map(function(d) {
+                var sel = (c.assignedDeputyId === d.userId || (c.assignedDeputyName && c.assignedDeputyName.indexOf(d.fullName) !== -1)) ? 'selected' : '';
+                return '<option value="' + d.userId + '" ' + sel + '>' + d.rank + ' ' + d.fullName + ' (' + d.position + ')</option>';
+              }).join('');
+
+            // Nạp danh sách Cán bộ
+            var offBox = document.getElementById('md-officers-box');
+            var cIds = (c.assignedOfficerIds || '').split(',').map(function(s){return s.trim();});
+            var cNames = (c.assignedOfficerNames || '').split(',').map(function(s){return s.trim();});
+            offBox.innerHTML = cachedOfficers.map(function(o) {
+              var checked = (cIds.indexOf(o.userId) !== -1 || cNames.some(function(n){return n.indexOf(o.fullName) !== -1;})) ? 'checked' : '';
+              return '<label class="flex items-center gap-1.5 p-0.5 cursor-pointer"><input type="checkbox" name="md-off-chk" value="' + o.userId + '" data-name="' + o.rank + ' ' + o.fullName + '" ' + checked + '><span>' + o.rank + ' ' + o.fullName + ' (' + o.position + ')</span></label>';
+            }).join('');
+
+            document.getElementById('md-directive').value = c.directiveNote || '';
+
+            var histEl = document.getElementById('md-hist');
+            if (res.data.histories && res.data.histories.length > 0) {
+              histEl.innerHTML = res.data.histories.map(function(h) {
+                return '<div class="p-1 bg-slate-50 border rounded"><span class="font-bold">' + h.action + '</span> - ' + h.performedBy + ' (' + h.note + ')</div>';
+              }).join('');
+            } else histEl.innerHTML = '';
+          }
+        }).getCaseDetail(caseId, currentOfficer);
+      }
+    }
+
+    function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+    function saveAssignment() {
+      if (!isLeadership(currentOfficer)) {
+        alert('Đồng chí không có quyền phân công hồ sơ nghiệp vụ.');
+        return;
+      }
+      var depSel = document.getElementById('md-deputy');
+      var depId = depSel.value;
+      var depName = "";
+      if (depId) {
+        var fDep = cachedOfficers.find(function(o) { return o.userId === depId; });
+        depName = fDep ? (fDep.rank + ' ' + fDep.fullName) : depSel.options[depSel.selectedIndex].text;
+      }
+      var oIds = [], oNames = [];
+      document.querySelectorAll('input[name="md-off-chk"]:checked').forEach(function(el) {
+        oIds.push(el.value); oNames.push(el.getAttribute('data-name'));
+      });
+      var payload = {
+        caseId: activeDetailCaseId, deputyId: depId, deputyName: depName,
+        officerIds: oIds, officerNames: oNames, directive: document.getElementById('md-directive').value
+      };
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message); viewCase(activeDetailCaseId); loadDashboardCases();
+        }).assignCaseToLeadershipAndOfficers(payload, currentOfficer);
+      }
+    }
+
+    function saveStatus() {
+      var st = document.getElementById('md-next-status').value, note = document.getElementById('md-res-note').value;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message); viewCase(activeDetailCaseId); loadDashboardCases();
+        }).updateCaseStatus(activeDetailCaseId, st, note, note, currentOfficer);
+      }
+    }
+
+    function deleteCurrentCase() {
+      if (!confirm('Xóa vĩnh viễn hồ sơ này?')) return;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message); closeDetailModal(); loadDashboardCases();
+        }).deleteCaseRecordPermanent(activeDetailCaseId, currentOfficer);
+      }
+    }
+
+    function loadStats() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res.success) {
+            var d = res.data;
+            document.getElementById('st-total').innerText = d.total;
+            document.getElementById('st-today').innerText = d.today;
+            document.getElementById('st-new').innerText = d.newCases;
+            document.getElementById('st-proc').innerText = d.processing;
+            document.getElementById('st-res').innerText = d.resolved;
+            
+            if (vChart) vChart.destroy();
+            vChart = new Chart(document.getElementById('villageChart'), {
+              type: 'bar',
+              data: { labels: Object.keys(d.villageStats), datasets: [{ data: Object.values(d.villageStats), backgroundColor: '#8B0000' }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            if (cChart) cChart.destroy();
+            cChart = new Chart(document.getElementById('catChart'), {
+              type: 'doughnut',
+              data: { labels: Object.keys(d.categoryStats), datasets: [{ data: Object.values(d.categoryStats), backgroundColor: ['#8B0000', '#B71C1C', '#E65100', '#F57F17', '#1B5E20', '#0D47A1'] }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } }
+            });
+          }
+        }).getDashboardStats(currentOfficer);
+      }
+    }
+
+    function renderOfficers() {
+      var tbody = document.getElementById('officers-tbody');
+      var canEdit = isLeadership(currentOfficer);
+      tbody.innerHTML = cachedOfficers.map(function(o) {
+        var actions = '--';
+        if (canEdit) {
+          actions = '<div class="space-x-1">' +
+            '<button onclick="editOfficer(\'' + o.userId + '\')" class="px-2 py-0.5 bg-blue-700 text-white rounded text-[10px] cursor-pointer">Sửa / Gán thôn</button>' +
+            '<button onclick="resetOfficerPass(\'' + o.userId + '\')" class="px-2 py-0.5 bg-amber-700 text-white rounded text-[10px] cursor-pointer">Reset Pass</button>' +
+          '</div>';
+        }
+        return '<tr>' +
+          '<td class="p-2 font-mono font-bold">' + o.badgeNumber + '</td><td class="p-2 font-bold">' + o.fullName + '</td>' +
+          '<td class="p-2">' + o.rank + ' - ' + o.position + '</td><td class="p-2">' + o.role + '</td>' +
+          '<td class="p-2">' + (o.phone || '--') + '</td>' +
+          '<td class="p-2 max-w-xs font-semibold text-slate-800">' + (o.assignedVillages || 'Chưa gán') + '</td>' +
+          '<td class="p-2 text-center">' + actions + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function renderVillageCheckboxes(selectedList) {
+      var container = document.getElementById('village-checkboxes');
+      var list = selectedList || [];
+      if (typeof list === 'string') list = list.split(',').map(function(s){return s.trim();});
+      
+      container.innerHTML = ALL_VILLAGES.map(function(v) {
+        var checked = list.indexOf(v) !== -1 ? 'checked' : '';
+        return '<label class="flex items-center gap-1.5 p-1 hover:bg-slate-50 rounded cursor-pointer text-[11px]">' +
+          '<input type="checkbox" name="of-village-chk" value="' + v + '" ' + checked + ' />' +
+          '<span>' + v + '</span>' +
+        '</label>';
+      }).join('');
+    }
+
+    function toggleAllVillages() {
+      var chks = document.querySelectorAll('input[name="of-village-chk"]');
+      var allChecked = Array.from(chks).every(function(c){return c.checked;});
+      chks.forEach(function(c){ c.checked = !allChecked; });
+    }
+
+    function openOfficerModal() {
+      document.getElementById('officer-modal').classList.remove('hidden');
+      document.getElementById('of-id').value = ''; document.getElementById('of-name').value = '';
+      document.getElementById('of-badge').value = ''; document.getElementById('of-pos').value = '';
+      document.getElementById('of-phone').value = '';
+      renderVillageCheckboxes([]);
+    }
+    function closeOfficerModal() { document.getElementById('officer-modal').classList.add('hidden'); }
+
+    function editOfficer(userId) {
+      var o = cachedOfficers.find(function(x){return x.userId === userId;});
+      if (!o) return;
+      openOfficerModal();
+      document.getElementById('of-id').value = o.userId; document.getElementById('of-name').value = o.fullName;
+      document.getElementById('of-badge').value = o.badgeNumber; document.getElementById('of-rank').value = o.rank;
+      document.getElementById('of-pos').value = o.position; document.getElementById('of-role').value = o.role;
+      document.getElementById('of-phone').value = o.phone || '';
+      renderVillageCheckboxes(o.assignedVillages);
+    }
+
+    function handleSaveOfficer(e) {
+      e.preventDefault();
+      var selectedVillages = [];
+      document.querySelectorAll('input[name="of-village-chk"]:checked').forEach(function(el) {
+        selectedVillages.push(el.value);
+      });
+
+      var payload = {
+        userId: document.getElementById('of-id').value, fullName: document.getElementById('of-name').value,
+        badgeNumber: document.getElementById('of-badge').value, rank: document.getElementById('of-rank').value,
+        position: document.getElementById('of-pos').value, role: document.getElementById('of-role').value,
+        phone: document.getElementById('of-phone').value, assignedVillages: selectedVillages
+      };
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message); closeOfficerModal(); loadDashboardCases(); switchTab('officers');
+        }).saveOfficerUser(payload, currentOfficer);
+      }
+    }
+
+    function resetOfficerPass(userId) {
+      if (!confirm('Đặt lại mật khẩu của cán bộ này về "1"?')) return;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message);
+        }).resetOfficerPassword(userId, currentOfficer);
+      }
+    }
+
+    function loadAudit() {
+      var tbody = document.getElementById('audit-tbody');
+      tbody.innerHTML = '<tr><td colspan="4" class="p-2 text-center text-slate-400">Đang tải...</td></tr>';
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res.success) {
+            tbody.innerHTML = res.data.map(function(l) {
+              return '<tr><td class="p-2 font-mono">' + new Date(l.timestamp).toLocaleString('vi-VN') + '</td><td class="p-2 font-bold">' + l.userName + '</td><td class="p-2 font-bold text-red-950">' + l.action + '</td><td class="p-2">' + l.details + '</td></tr>';
+            }).join('');
+          }
+        }).getAuditLogs(currentOfficer);
+      }
+    }
+
+    function handleChangePass(e) {
+      e.preventDefault();
+      var o = document.getElementById('cp-old').value, n = document.getElementById('cp-new').value;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res.message); 
+          if (res.success) {
+            document.getElementById('cp-modal').classList.add('hidden');
+            document.getElementById('cp-old').value = '';
+            document.getElementById('cp-new').value = '';
+          }
+        }).changeOfficerPassword(o, n, currentOfficer);
+      }
+    }
+  </script>
+</body>
+</html>
